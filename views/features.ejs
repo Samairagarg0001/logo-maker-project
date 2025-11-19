@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Features | Logo Maker</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f5f7fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    header {
+      background: #222;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    header h1 a {
+        color: #fff;
+        text-decoration: none;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+    nav a {
+      margin: 0 12px;
+      color: #fff;
+      font-weight: 500;
+      transition: color 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    nav a:hover,
+    nav a.active {
+      color: #ff9800;
+    }
+
+    /* Main content */
+    main {
+      flex-grow: 1;
+      padding: 2rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h2 {
+      color: #4e54c8;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+    p.description {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    /* Filter Input */
+    .filter-container {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .filter-container input {
+      width: 280px;
+      max-width: 90%;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border: 2px solid #4e54c8;
+      border-radius: 25px;
+      transition: border-color 0.3s;
+    }
+    .filter-container input:focus {
+      border-color: #ff9800;
+      outline: none;
+      box-shadow: 0 0 8px #ff9800aa;
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 25px;
+    }
+
+    /* Feature Card */
+    .feature-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 20px rgba(78, 84, 200, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(78, 84, 200, 0.3);
+    }
+
+    /* Icon */
+    .feature-icon {
+      font-size: 3.5rem;
+      color: #4e54c8;
+      margin-bottom: 1.25rem;
+      user-select: none;
+    }
+
+    /* Feature Title */
+    .feature-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #222;
+    }
+
+    /* Feature Description */
+    .feature-desc {
+      font-size: 1rem;
+      color: #666;
+      flex-grow: 1;
+    }
+
+    /* Footer */
+    footer {
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/nav') %>
+
+  <main>
+    <h2>Explore Our Logo Features</h2>
+    <p class="description">Discover the powerful tools and options that make Logo Maker your best choice to design stunning logos effortlessly.</p>
+
+    <div class="filter-container">
+      <input
+        type="text"
+        id="featureSearch"
+        placeholder="Search features..."
+        aria-label="Search features"
+      />
+    </div>
+
+    <div class="features-grid" id="featuresGrid">
+      <p>Loading features...</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Logo Maker | Built with Node.js & Express</p>
+  </footer>
+
+  <script>
+    const featuresGrid = document.getElementById('featuresGrid');
+    const featureSearch = document.getElementById('featureSearch');
+    let features = [];
+
+    async function fetchFeatures() {
+      try {
+        const res = await fetch('/api/features'); // Fetch from our server's API
+        if (!res.ok) throw new Error('Failed to load features');
+        features = await res.json();
+        renderFeatures();
+      } catch (err) {
+        featuresGrid.innerHTML = `<p style="color: red; text-align:center;">Error loading features: ${err.message}</p>`;
+      }
+    }
+
+    function renderFeatures(filter = '') {
+      featuresGrid.innerHTML = '';
+      const filtered = features.filter(feature =>
+        feature.title.toLowerCase().includes(filter.toLowerCase()) ||
+        feature.desc.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      if (filtered.length === 0) {
+        featuresGrid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#999; font-style:italic;">No features found matching "${filter}"</p>`;
+        return;
+      }
+
+      filtered.forEach(feature => {
+        const card = document.createElement('div');
+        card.className = 'feature-card';
+
+        // Use FontAwesome icons from the API data
+        card.innerHTML = `
+          <div class="feature-icon"><i class="fa-solid fa-${feature.icon}"></i></div>
+          <h3 class="feature-title">${feature.title}</h3>
+          <p class="feature-desc">${feature.desc}</p>
+        `;
+
+        featuresGrid.appendChild(card);
+      });
+    }
+
+    // Initial fetch and render
+    fetchFeatures();
+
+    // Filter on input
+    featureSearch.addEventListener('input', e => {
+      renderFeatures(e.target.value);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<script src="/socket.io/socket.io.js"></script>
+
+<header>
+  <h1><a href="/">Logo Maker</a></h1>
+  <nav style="display: flex; align-items: center; gap: 15px;">
+    <span style="background: #2ecc71; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+      🟢 <span id="active-user-count">1</span> Online
+    </span>
+
+    <a href="/features">Features</a>
+    <a href="/templates">Templates</a>
+    <a href="/editor">Create</a>
+    
+    <% if (user) { %>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/logout" style="background: #ff9800; padding: 5px 15px; border-radius: 4px; color: white;">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </nav>
+</header>
+
+<script>
+  // Connect to the socket server
+  const socket = io();
+
+  // Listen for the 'userCount' event from the server
+  socket.on('userCount', (count) => {
+    document.getElementById('active-user-count').innerText = count;
+  });
+</script>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Templates</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+    
+    /* Header/Navbar */
+    header {
+        background: #222;
+        color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    header h1 a {
+        color: #fff;
+        text-decoration: none;
+    }
+    header h1 {
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+    nav a {
+        margin: 0 10px;
+        color: #fff;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    nav a:hover, nav a.active {
+        color: #ff9800;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #512da8, #673ab7);
+      padding: 60px 20px 40px;
+      text-align: center;
+      color: white;
+    }
+    .page-header h2 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .page-header p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .choose-line {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    /* Template Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease-in-out;
+      cursor: pointer;
+      text-align: center;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-body {
+      padding: 15px;
+    }
+    .card-body h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #2d2f90;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: #2d2f90;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out;
+    }
+    .btn:hover {
+      background: #1e2066;
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/nav') %>
+
+  <section class="page-header">
+    <h2>Explore Logo Templates</h2>
+    <p>✨ Browse our handpicked collection of ready-to-use logos ✨</p>
+  </section>
+
+  <div class="container">
+    <p class="choose-line">Choose a template and start customizing instantly!</p>
+
+    <div class="grid">
+      <div class="card">
+        <img src="https://static.wixstatic.com/media/72c0b2_86dde6cc21f543b5beb30d9c68779614~mv2.jpg/v1/fill/w_924,h_476,al_c,q_85,enc_avif,quality_auto/72c0b2_86dde6cc21f543b5beb30d9c68779614~mv2.jpg" alt="Template 1">
+        <div class="card-body">
+          <h3>Modern Tech Logo</h3>
+          <a href="/editor" class="btn">Customize</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://graphicdesignjunction.com/wp-content/uploads/2024/08/minimal_logo_design_16.png" alt="Template 2">
+        <div class="card-body">
+          <h3>Creative Design Logo</h3>
+          <a href="/editor" class="btn">Customize</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://media.istockphoto.com/id/1053291038/vector/business-finance-bar-profit-vector-illustration.jpg?s=612x612&w=0&k=20&c=r0axxeuEroKcQO7lhVziB0-AFuRTFfGUfnrfF1euzB4=" alt="Template 3">
+        <div class="card-body">
+          <h3>Business Logo</h3>
+          <a href="/editor" class="btn">Customize</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

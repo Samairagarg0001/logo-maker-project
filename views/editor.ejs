@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Editor | Logo Maker</title>
+  <style>
+    /* (Same CSS as before - no changes needed here) */
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #f5f7fa; color: #333; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+    header { background: #222; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 a { color: #fff; text-decoration: none; }
+    nav a { margin: 0 10px; color: #fff; text-decoration: none; }
+    .editor-container { display: flex; flex: 1; height: calc(100vh - 60px); }
+    .toolbar { width: 260px; background: #fff; padding: 1rem; overflow-y: auto; border-right: 1px solid #ddd; }
+    .tool-section { margin-bottom: 1.5rem; }
+    .tool-section h3 { font-size: 0.9rem; color: #4e54c8; border-bottom: 2px solid #f0f0f5; padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .tool-btn { display: block; width: 100%; padding: 10px; margin: 5px 0; background: #f8f9fa; border: 1px solid #eee; border-radius: 5px; text-align: left; cursor: pointer; transition: 0.2s; }
+    .tool-btn:hover { background: #e9ecef; }
+    .tool-btn.active { background: #4e54c8; color: white; border-color: #4e54c8; }
+    .canvas-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #eef2f7; position: relative; }
+    .save-controls { display: flex; gap: 10px; margin-bottom: 15px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .save-controls input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 200px; }
+    .save-btn { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    #logo-canvas { background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); cursor: crosshair; }
+    .canvas-controls { margin-top: 15px; display: flex; gap: 10px; }
+    .control-btn { padding: 8px 15px; background: #4e54c8; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .control-btn:hover { background: #3b40a4; }
+    .properties-panel { width: 260px; background: #fff; padding: 1rem; border-left: 1px solid #ddd; overflow-y: auto; }
+    .property-group { margin-bottom: 1.5rem; }
+    .property-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+    .property-group input, .property-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .color-picker { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
+    .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .color-option.active { border-color: #333; transform: scale(1.1); }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .checkbox-group input { width: auto; }
+    .checkbox-group label { margin: 0; }
+  </style>
+</head>
+<body>
+  <%- include('partials/nav') %>
+
+  <div class="editor-container">
+    <div class="toolbar">
+      <div class="tool-section">
+        <h3>Shapes</h3>
+        <button class="tool-btn active" data-tool="rectangle">⬜ Rectangle</button>
+        <button class="tool-btn" data-tool="circle">⚪ Circle</button>
+        <button class="tool-btn" data-tool="triangle">🔺 Triangle</button>
+        <button class="tool-btn" data-tool="line">➖ Line</button>
+      </div>
+      <div class="tool-section">
+        <h3>Text</h3>
+        <button class="tool-btn" data-tool="add-text">🔤 Text Box</button>
+      </div>
+      <div class="tool-section">
+        <h3>Colors</h3>
+        <div class="color-picker">
+          <div class="color-option" style="background: #4e54c8;" data-color="#4e54c8"></div>
+          <div class="color-option" style="background: #ff9800;" data-color="#ff9800"></div>
+          <div class="color-option" style="background: #e91e63;" data-color="#e91e63"></div>
+          <div class="color-option" style="background: #009688;" data-color="#009688"></div>
+          <div class="color-option" style="background: #000000;" data-color="#000000"></div>
+          <div class="color-option" style="background: #ffffff; border: 1px solid #ccc;" data-color="#ffffff"></div>
+        </div>
+        <input type="color" id="custom-color" value="#4e54c8" style="width: 100%; margin-top: 10px; height: 40px;">
+      </div>
+    </div>
+    
+    <div class="canvas-area">
+      <div class="save-controls">
+        <input type="text" id="logo-name" placeholder="Name your logo..." value="<%= (typeof logoToEdit !== 'undefined' && logoToEdit) ? logoToEdit.name : '' %>">
+        <button class="save-btn" id="save-db-btn">Save Logo</button>
+      </div>
+      <canvas id="logo-canvas" width="600" height="450"></canvas>
+      <div class="canvas-controls">
+        <button class="control-btn" id="undo-btn">Undo</button>
+        <button class="control-btn" id="clear-btn">Clear All</button>
+        <button class="control-btn" id="download-btn">Download PNG</button>
+      </div>
+    </div>
+    
+    <div class="properties-panel">
+      <div class="property-group">
+        <h3>Fill & Stroke</h3>
+        <div class="checkbox-group">
+            <input type="checkbox" id="fill-shape">
+            <label for="fill-shape">Fill Shape</label>
+        </div>
+        <label>Opacity</label>
+        <input type="range" id="opacity" min="10" max="100" value="100">
+      </div>
+      <div class="property-group">
+        <h3>Typography</h3>
+        <label>Font Size</label>
+        <input type="range" id="font-size" min="20" max="100" value="30">
+        <label>Font Family</label>
+        <select id="font-family">
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Impact">Impact</option>
+        </select>
+      </div>
+      <div class="property-group">
+        <h3>Background</h3>
+        <input type="color" id="bg-color" value="#ffffff" style="height: 40px;">
+      </div>
+    </div>
+  </div>
+
+  <% if (typeof logoToEdit !== 'undefined' && logoToEdit) { %>
+    <img id="loaded-image" src="<%= logoToEdit.logoData %>" style="display:none;">
+  <% } %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const canvas = document.getElementById('logo-canvas');
+      const ctx = canvas.getContext('2d');
+      let isDrawing = false, startX = 0, startY = 0;
+      let currentTool = 'rectangle', currentColor = '#4e54c8';
+      let history = [], historyIndex = -1, canvasSnapshot = null;
+
+      // Initial State
+      saveState(); 
+      
+      // Check Editing
+      const loadedImg = document.getElementById('loaded-image');
+      if (loadedImg) { ctx.drawImage(loadedImg, 0, 0); saveState(); }
+
+      // --- Helper: Merge Background for Export ---
+      function getCanvasWithBackground() {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tCtx = tempCanvas.getContext('2d');
+
+          // 1. Draw Background Color
+          const bgColor = document.getElementById('bg-color').value;
+          tCtx.fillStyle = bgColor;
+          tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+          // 2. Draw Original Content
+          tCtx.drawImage(canvas, 0, 0);
+          
+          return tempCanvas.toDataURL('image/png');
+      }
+
+      // --- Drawing Logic ---
+      function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '', currentY = y;
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            if (context.measureText(testLine).width > maxWidth && n > 0) {
+                context.fillText(line, x, currentY); line = words[n] + ' '; currentY += lineHeight;
+            } else { line = testLine; }
+        }
+        context.fillText(line, x, currentY);
+      }
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true; startX = e.offsetX; startY = e.offsetY;
+        canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        ctx.putImageData(canvasSnapshot, 0, 0);
+        const w = e.offsetX - startX, h = e.offsetY - startY;
+        
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = currentColor; ctx.fillStyle = currentColor; ctx.lineWidth = 2;
+        const fill = document.getElementById('fill-shape').checked;
+
+        ctx.beginPath();
+        if(currentTool==='rectangle') fill ? ctx.fillRect(startX, startY, w, h) : ctx.strokeRect(startX, startY, w, h);
+        else if(currentTool==='circle') { ctx.arc(startX, startY, Math.sqrt(w*w+h*h), 0, Math.PI*2); fill?ctx.fill():ctx.stroke(); }
+        else if(currentTool==='triangle') { ctx.moveTo(startX+w/2, startY); ctx.lineTo(startX+w, startY+h); ctx.lineTo(startX, startY+h); ctx.closePath(); fill?ctx.fill():ctx.stroke(); }
+        else if(currentTool==='line') { ctx.moveTo(startX, startY); ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }
+        else if(currentTool==='add-text') { ctx.setLineDash([5,5]); ctx.strokeRect(startX, startY, w, h); ctx.setLineDash([]); }
+      });
+
+      canvas.addEventListener('mouseup', (e) => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        ctx.putImageData(canvasSnapshot, 0, 0);
+        const w = e.offsetX - startX, h = e.offsetY - startY;
+
+        ctx.globalAlpha = document.getElementById('opacity').value / 100;
+        ctx.strokeStyle = currentColor; ctx.fillStyle = currentColor; ctx.lineWidth = 2;
+        const fill = document.getElementById('fill-shape').checked;
+
+        ctx.beginPath();
+        if(currentTool==='rectangle') fill ? ctx.fillRect(startX, startY, w, h) : ctx.strokeRect(startX, startY, w, h);
+        else if(currentTool==='circle') { ctx.arc(startX, startY, Math.sqrt(w*w+h*h), 0, Math.PI*2); fill?ctx.fill():ctx.stroke(); }
+        else if(currentTool==='triangle') { ctx.moveTo(startX+w/2, startY); ctx.lineTo(startX+w, startY+h); ctx.lineTo(startX, startY+h); ctx.closePath(); fill?ctx.fill():ctx.stroke(); }
+        else if(currentTool==='line') { ctx.moveTo(startX, startY); ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }
+        else if(currentTool==='add-text') {
+            const txt = prompt("Enter text:");
+            if(txt) {
+                const fs = parseInt(document.getElementById('font-size').value);
+                ctx.font = `${fs}px ${document.getElementById('font-family').value}`;
+                ctx.fillStyle = currentColor;
+                wrapText(ctx, txt, startX+5, startY+fs, w, fs*1.2);
+            }
+        }
+        saveState();
+      });
+
+      // --- Controls ---
+      document.querySelectorAll('.tool-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentTool=btn.getAttribute('data-tool');
+      }));
+      document.querySelectorAll('.color-option').forEach(opt => opt.addEventListener('click', () => {
+         currentColor=opt.getAttribute('data-color'); document.getElementById('custom-color').value=currentColor;
+      }));
+      document.getElementById('custom-color').addEventListener('input', (e) => currentColor = e.target.value);
+
+      // Background Logic - VISUAL ONLY
+      document.getElementById('bg-color').addEventListener('input', (e) => {
+          canvas.style.backgroundColor = e.target.value; 
+      });
+
+      // Save State Logic
+      function saveState() { history = history.slice(0, historyIndex+1); history.push(canvas.toDataURL()); historyIndex++; }
+      document.getElementById('undo-btn').addEventListener('click', () => {
+         if(historyIndex<=0) return; historyIndex--; 
+         let img = new Image(); img.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0); }; 
+         img.src = history[historyIndex]; 
+      });
+      document.getElementById('clear-btn').addEventListener('click', () => { ctx.clearRect(0,0,canvas.width,canvas.height); saveState(); });
+
+      // --- SAVE & DOWNLOAD WITH BACKGROUND ---
+      document.getElementById('save-db-btn').addEventListener('click', async () => {
+        const name = document.getElementById('logo-name').value;
+        if(!name) return alert("Name required!");
+        
+        // USE THE HELPER FUNCTION
+        const logoData = getCanvasWithBackground(); 
+
+        const res = await fetch('/api/logos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, logoData })
+        });
+        if(res.ok) { alert('Saved!'); window.location.href='/dashboard'; }
+        else alert('Error saving.');
+      });
+
+      document.getElementById('download-btn').addEventListener('click', () => {
+          const a = document.createElement('a');
+          a.download = 'logo.png';
+          // USE THE HELPER FUNCTION
+          a.href = getCanvasWithBackground(); 
+          a.click();
+      });
+    });
+  </script>
+</body>
+</html>

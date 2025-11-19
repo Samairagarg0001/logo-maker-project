@@ -9,7 +9,8 @@ router.post('/register', async (req, res) => {
   try {
     let user = await User.findOne({ email });
     if (user) {
-      return res.send('User already exists. <a href="/login">Login</a>');
+      // (Note: In a real app you might want to render a page with an error instead of just text)
+      return res.send('<p>User already exists. <a href="/login">Login</a></p>');
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -18,16 +19,15 @@ router.post('/register', async (req, res) => {
     user = new User({ email, password: hashedPassword });
     await user.save();
 
-    // --- MICROSERVICE CALL START ---
-    // We fire and forget (we don't wait for the email to send before redirecting)
+    // --- 🚀 MICROSERVICE CALL ---
+    // We use fetch to talk to Port 4000
+    // We don't 'await' it because we don't want to make the user wait for the email
     fetch('http://localhost:4000/send-welcome', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
-    }).then(response => response.json())
-      .then(data => console.log("Microservice Response:", data))
-      .catch(err => console.error("Microservice Error:", err));
-    // --- MICROSERVICE CALL END ---
+    }).catch(err => console.error("Microservice Error:", err));
+    // ---------------------------
 
     res.redirect('/login');
   } catch (err) {

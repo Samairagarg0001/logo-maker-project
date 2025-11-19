@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Join Live Room | Logo Maker</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; display: flex; flex-direction: column; align-items: center; height: 100vh; margin: 0; }
+    .container { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-top: 100px; width: 100%; max-width: 400px; }
+    h2 { color: #4e54c8; margin-bottom: 1rem; }
+    input { width: 100%; padding: 12px; font-size: 1.2rem; text-align: center; border: 2px solid #ddd; border-radius: 5px; margin-bottom: 1rem; letter-spacing: 2px; }
+    button { width: 100%; padding: 12px; background: #e67e22; color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    button:hover { background: #d35400; }
+    a { text-decoration: none; color: #777; margin-top: 15px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Join Collaboration</h2>
+    <p>Enter the 6-digit Room ID shared by your friend.</p>
+    <input type="number" id="roomInput" placeholder="123456">
+    <button onclick="join()">Join Room</button>
+    <a href="/dashboard">Cancel</a>
+  </div>
+
+  <script>
+    function join() {
+        const code = document.getElementById('roomInput').value;
+        if(code.length < 4) return alert("Please enter a valid Room ID");
+        window.location.href = `/editor?room=${code}`;
+    }
+  </script>
+</body>
+</html>

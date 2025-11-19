@@ -1,37 +1,23 @@
+require('dotenv').config(); // Load .env variables
 const express = require('express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 
 const app = express();
-const port = 4000; // Running on a different port
+const port = 4000; // 👈 Running on a separate port
 
 app.use(bodyParser.json());
 
-// Create a "Fake" SMTP account automatically
-let transporter;
-
-nodemailer.createTestAccount((err, account) => {
-    if (err) {
-        console.error('Failed to create test account. ' + err.message);
-        return process.exit(1);
-    }
-
-    console.log('📧 Email Microservice Ready on Port 4000');
-    
-    // Create reusable transporter object using the default SMTP transport
-    transporter = nodemailer.createTransport({
-        host: account.smtp.host,
-        port: account.smtp.port,
-        secure: account.smtp.secure,
-        auth: {
-            user: account.user,
-            pass: account.pass
-        }
-    });
+// --- GMAIL CONFIGURATION ---
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // We will put these in .env
+    pass: process.env.GMAIL_PASS
+  }
 });
 
 // @route   POST /send-welcome
-// @desc    Send a welcome email (Called by Main App)
 app.post('/send-welcome', (req, res) => {
     const { email } = req.body;
 
@@ -40,27 +26,33 @@ app.post('/send-welcome', (req, res) => {
     }
 
     const mailOptions = {
-        from: '"Logo Maker Team" <support@logomaker.com>',
+        from: `"Logo Maker Team" <${process.env.GMAIL_USER}>`,
         to: email,
         subject: 'Welcome to Logo Maker! 🎨',
-        text: 'Thank you for registering with Logo Maker. Start creating amazing designs today!',
-        html: '<b>Thank you for registering with Logo Maker.</b><br>Start creating amazing designs today!'
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #4e54c8;">Welcome to the Family!</h2>
+                <p>Hi there,</p>
+                <p>Thank you for creating an account with <strong>Logo Maker</strong>.</p>
+                <p>We are excited to see the amazing designs you will create.</p>
+                <br>
+                <a href="https://localhost:3000/dashboard" style="background: #4e54c8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Dashboard</a>
+                <br><br>
+                <p style="color: #888; font-size: 0.9rem;">Happy Designing,<br>The Team</p>
+            </div>
+        `
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            console.log(error);
-            return res.status(500).json({ error: 'Failed to send email' });
+            console.log('❌ Error sending email:', error);
+            return res.status(500).json({ error: 'Failed to send' });
         }
-        
-        console.log('📨 Email sent to: %s', email);
-        // This URL allows you to view the email in your browser
-        console.log('🔗 Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        res.json({ message: 'Email sent successfully', preview: nodemailer.getTestMessageUrl(info) });
+        console.log(`✅ Email sent to: ${email}`);
+        res.json({ message: 'Email sent successfully' });
     });
 });
 
 app.listen(port, () => {
-    console.log(`🚀 Email Service running at http://localhost:${port}`);
+    console.log(`📧 Email Microservice running on Port ${port}`);
 });

@@ -63,6 +63,20 @@ let activeUsers = 0;
 io.on('connection', (socket) => {
     activeUsers++;
     io.emit('userCount', activeUsers);
+
+    // 1. JOIN A LOGO ROOM
+    socket.on('join_room', (roomId) => {
+        socket.join(roomId); // User enters the "room" for this specific Logo ID
+        console.log(`User joined room: ${roomId}`);
+    });
+
+    // 2. LISTEN FOR DRAWING EVENTS
+    socket.on('draw_shape', (data) => {
+        // Broadcast this shape to everyone ELSE in the same room
+        // socket.to(room) sends to everyone EXCEPT the sender
+        socket.to(data.roomId).emit('remote_shape', data);
+    });
+
     socket.on('disconnect', () => {
         activeUsers--;
         io.emit('userCount', activeUsers);

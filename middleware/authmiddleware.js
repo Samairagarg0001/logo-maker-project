@@ -1,12 +1,13 @@
-    // This function checks if a user is logged in
-const requireLogin = (req, res, next) => {
+// middleware/authMiddleware.js
+
+const requireAuth = (req, res, next) => {
+    // Check if user session exists
     if (req.session && req.session.user) {
-        // If user exists in session, let them pass!
-        return next();
+        return next(); // User is logged in, proceed
     } else {
-        // If not, kick them to the login page with a message
-        return res.redirect('/login?error=Please login first to create a logo');
+        return res.redirect('/login?error=Please login first'); // User not logged in
     }
 };
 
-module.exports = requireLogin;
+// IMPORTANT: We export it as an object { requireAuth }
+module.exports = { requireAuth };
